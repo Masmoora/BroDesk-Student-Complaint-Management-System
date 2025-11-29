@@ -115,6 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
+            phone_number: phoneNumber,
           },
         },
       });
@@ -123,24 +124,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
       }
 
-      // Create profile and role with approval status as pending
+      // Profile is auto-created by handle_new_user trigger
+      // Only insert user role
       if (user) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert({
-            id: user.id,
-            email: user.email!,
-            full_name: fullName,
-            phone_number: phoneNumber,
-            approval_status: 'pending',
-          });
-
-        if (profileError) {
-          console.error("Error creating profile:", profileError);
-          return { error: profileError };
-        }
-
-        // Insert user role
         const { error: roleError } = await supabase
           .from("user_roles")
           .insert({
