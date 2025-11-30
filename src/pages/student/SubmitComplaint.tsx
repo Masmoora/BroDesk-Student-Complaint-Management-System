@@ -81,6 +81,24 @@ export default function SubmitComplaint() {
 
       if (error) throw error;
 
+      // Get admin users to notify them
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+
+      // Create notifications for all admins
+      if (adminRoles && adminRoles.length > 0) {
+        const notifications = adminRoles.map(admin => ({
+          user_id: admin.user_id,
+          title: "New Complaint Submitted",
+          message: `A new complaint "${title.trim()}" has been submitted and needs review.`,
+          type: "complaint_created",
+        }));
+
+        await supabase.from("notifications").insert(notifications);
+      }
+
       toast({
         title: "Success",
         description: "Complaint submitted successfully",
