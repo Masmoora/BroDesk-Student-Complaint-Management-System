@@ -25,6 +25,14 @@ export default function Auth() {
     password: "",
     confirmPassword: "",
     role: "student" as "student" | "staff",
+    // Student fields
+    batchType: "",
+    batchNumber: "",
+    course: "",
+    studentId: "",
+    // Staff fields
+    category: "",
+    specialization: "",
   });
 
   const handleChange = (field: string, value: string) => {
@@ -56,6 +64,46 @@ export default function Auth() {
           variant: "destructive",
         });
         return false;
+      }
+      
+      // Student-specific validation
+      if (formData.role === "student") {
+        if (!formData.batchType) {
+          toast({
+            title: "Validation Error",
+            description: "Batch type is required for students",
+            variant: "destructive",
+          });
+          return false;
+        }
+        if (!formData.batchNumber.trim()) {
+          toast({
+            title: "Validation Error",
+            description: "Batch number is required for students",
+            variant: "destructive",
+          });
+          return false;
+        }
+        if (!formData.course.trim()) {
+          toast({
+            title: "Validation Error",
+            description: "Course is required for students",
+            variant: "destructive",
+          });
+          return false;
+        }
+      }
+      
+      // Staff-specific validation
+      if (formData.role === "staff") {
+        if (!formData.category.trim()) {
+          toast({
+            title: "Validation Error",
+            description: "Category is required for staff",
+            variant: "destructive",
+          });
+          return false;
+        }
       }
     }
 
@@ -105,7 +153,15 @@ export default function Auth() {
           formData.password,
           formData.name,
           formData.role,
-          formData.phone
+          formData.phone,
+          {
+            batchType: formData.batchType,
+            batchNumber: formData.batchNumber,
+            course: formData.course,
+            studentId: formData.studentId,
+            category: formData.category,
+            specialization: formData.specialization,
+          }
         );
         if (error) {
           toast({
@@ -125,6 +181,12 @@ export default function Auth() {
             password: "",
             confirmPassword: "",
             role: "student",
+            batchType: "",
+            batchNumber: "",
+            course: "",
+            studentId: "",
+            category: "",
+            specialization: "",
           });
           setMode("login");
         }
@@ -248,6 +310,90 @@ export default function Auth() {
                       </div>
                     </RadioGroup>
                   </div>
+
+                  {/* Student-specific fields */}
+                  {formData.role === "student" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Batch Type</Label>
+                        <RadioGroup
+                          value={formData.batchType}
+                          onValueChange={(value) => handleChange("batchType", value)}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="Remote" id="remote" />
+                            <Label htmlFor="remote" className="font-normal cursor-pointer">
+                              Remote
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="Offline" id="offline" />
+                            <Label htmlFor="offline" className="font-normal cursor-pointer">
+                              Offline
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="batchNumber">Batch Number</Label>
+                        <Input
+                          id="batchNumber"
+                          value={formData.batchNumber}
+                          onChange={(e) => handleChange("batchNumber", e.target.value)}
+                          placeholder="Enter batch number"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="course">Course</Label>
+                        <Input
+                          id="course"
+                          value={formData.course}
+                          onChange={(e) => handleChange("course", e.target.value)}
+                          placeholder="Enter your course"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="studentId">Student ID (Optional)</Label>
+                        <Input
+                          id="studentId"
+                          value={formData.studentId}
+                          onChange={(e) => handleChange("studentId", e.target.value)}
+                          placeholder="Enter student ID"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Staff-specific fields */}
+                  {formData.role === "staff" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Input
+                          id="category"
+                          value={formData.category}
+                          onChange={(e) => handleChange("category", e.target.value)}
+                          placeholder="Enter your category/department"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="specialization">Specialization (Optional)</Label>
+                        <Input
+                          id="specialization"
+                          value={formData.specialization}
+                          onChange={(e) => handleChange("specialization", e.target.value)}
+                          placeholder="Enter your specialization"
+                        />
+                      </div>
+                    </>
+                  )}
                 </>
               )}
 

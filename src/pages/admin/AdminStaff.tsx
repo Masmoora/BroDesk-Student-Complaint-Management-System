@@ -80,11 +80,18 @@ export default function AdminStaff() {
         .from("profiles")
         .update({
           approval_status: "approved",
-          updated_at: new Date().toISOString()
         })
         .eq("id", userId);
 
       if (error) throw error;
+
+      // Create notification for the staff member
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        title: "Account Approved",
+        message: "Your staff account has been approved by admin. You can now login.",
+        type: "approval",
+      });
 
       toast({
         title: "Success",
@@ -107,11 +114,18 @@ export default function AdminStaff() {
         .from("profiles")
         .update({
           approval_status: "rejected",
-          updated_at: new Date().toISOString()
         })
         .eq("id", userId);
 
       if (error) throw error;
+
+      // Create notification for the staff member
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        title: "Account Rejected",
+        message: "Your staff account registration has been rejected by admin.",
+        type: "rejection",
+      });
 
       toast({
         title: "Success",

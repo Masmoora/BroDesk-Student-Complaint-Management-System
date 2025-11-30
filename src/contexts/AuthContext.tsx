@@ -10,7 +10,21 @@ interface AuthContextType {
   session: Session | null;
   userRole: UserRole | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: "student" | "staff", phoneNumber: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string, 
+    password: string, 
+    fullName: string, 
+    role: "student" | "staff", 
+    phoneNumber: string,
+    additionalData?: {
+      batchType?: string;
+      batchNumber?: string;
+      course?: string;
+      studentId?: string;
+      category?: string;
+      specialization?: string;
+    }
+  ) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -90,7 +104,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: "student" | "staff" = "student", phoneNumber: string) => {
+  const signUp = async (
+    email: string, 
+    password: string, 
+    fullName: string, 
+    role: "student" | "staff" = "student", 
+    phoneNumber: string,
+    additionalData?: {
+      batchType?: string;
+      batchNumber?: string;
+      course?: string;
+      studentId?: string;
+      category?: string;
+      specialization?: string;
+    }
+  ) => {
     try {
       // Validate inputs
       if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
@@ -116,6 +144,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           data: {
             full_name: fullName,
             phone_number: phoneNumber,
+            ...additionalData,
           },
         },
       });
@@ -125,8 +154,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Profile is auto-created by handle_new_user trigger
-      // Only insert user role
+      // Update profile with additional fields and insert user role
       if (user) {
+        // Update profile with role-specific fields
+        const profileUpdates: any = {};
+        if (additionalData?.batchType) profileUpdates.batch_type = additionalData.batchType;
+        if (additionalData?.batchNumber) profileUpdates.batch_number = additionalData.batchNumber;
+        if (additionalData?.course) profileUpdates.course = additionalData.course;
+        if (additionalData?.studentId) profileUpdates.student_id = additionalData.studentId;
+        if (additionalData?.category) profileUpdates.category = additionalData.category;
+        if (additionalData?.specialization) profileUpdates.specialization = additionalData.specialization;
+
+        if (Object.keys(profileUpdates).length > 0) {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .update(profileUpdates)
+            .eq("id", user.id);
+
+          if (profileError) {
+            console.error("Error updating profile:", profileError);
+          }
+        }
+
+        // Insert user role
         const { error: roleError } = await supabase
           .from("user_roles")
           .insert({
@@ -138,6 +188,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.error("Error creating user role:", roleError);
           return { error: roleError };
         }
+
+        // Create notification for admin about new signup
+        await supabase.from("notifications").insert({
+          user_id: user.id,
+          title: "New User Registration",
+          message: `New ${role} registration: ${fullName} (${email})`,
+          type: "signup",
+        });
 
         // Sign out immediately after signup to prevent auto-login
         await supabase.auth.signOut();
@@ -191,6 +249,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    // Clear any cached data
+    localStorage.clear();
+    sessionStorage.clear();
     navigate("/auth");
   };
 

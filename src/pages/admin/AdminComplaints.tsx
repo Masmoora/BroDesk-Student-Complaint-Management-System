@@ -69,6 +69,9 @@ export default function AdminComplaints() {
   };
 
   const handleAssignStaff = async (complaintId: string, staffId: string) => {
+    // Get complaint details for notification
+    const complaint = complaints.find(c => c.id === complaintId);
+    
     const { error } = await supabase
       .from("complaints")
       .update({ assigned_to: staffId })
@@ -81,6 +84,16 @@ export default function AdminComplaints() {
         variant: "destructive",
       });
     } else {
+      // Create notification for the assigned staff member
+      if (complaint) {
+        await supabase.from("notifications").insert({
+          user_id: staffId,
+          title: "New Complaint Assigned",
+          message: `You have been assigned to complaint: "${complaint.title}"`,
+          type: "complaint_assigned",
+        });
+      }
+
       toast({
         title: "Success",
         description: "Staff assigned successfully",

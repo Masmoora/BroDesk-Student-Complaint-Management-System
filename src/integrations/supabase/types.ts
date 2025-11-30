@@ -106,30 +106,81 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           approval_status: string
+          batch_number: string | null
+          batch_type: string | null
+          category: string | null
+          course: string | null
           created_at: string
           email: string
           full_name: string
           id: string
           phone_number: string | null
+          specialization: string | null
+          student_id: string | null
+          updated_at: string | null
         }
         Insert: {
           approval_status?: string
+          batch_number?: string | null
+          batch_type?: string | null
+          category?: string | null
+          course?: string | null
           created_at?: string
           email: string
           full_name: string
           id: string
           phone_number?: string | null
+          specialization?: string | null
+          student_id?: string | null
+          updated_at?: string | null
         }
         Update: {
           approval_status?: string
+          batch_number?: string | null
+          batch_type?: string | null
+          category?: string | null
+          course?: string | null
           created_at?: string
           email?: string
           full_name?: string
           id?: string
           phone_number?: string | null
+          specialization?: string | null
+          student_id?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
