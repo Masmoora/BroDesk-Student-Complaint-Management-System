@@ -15,6 +15,12 @@ interface User {
   phone_number: string | null;
   approval_status: string | null;
   role?: string;
+  batch_type?: string;
+  batch_number?: string;
+  course?: string;
+  category?: string;
+  student_id?: string;
+  specialization?: string;
 }
 
 export default function AdminUsers() {
@@ -159,6 +165,7 @@ export default function AdminUsers() {
                         <TableHead>Email</TableHead>
                         <TableHead>Phone</TableHead>
                         <TableHead>Role</TableHead>
+                        <TableHead>Additional Info</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -169,6 +176,21 @@ export default function AdminUsers() {
                           <TableCell>{user.email}</TableCell>
                           <TableCell>{user.phone_number}</TableCell>
                           <TableCell className="capitalize">{user.role}</TableCell>
+                          <TableCell>
+                            {user.role === 'student' && (
+                              <div className="text-sm">
+                                <div>Batch: {user.batch_type} - {user.batch_number}</div>
+                                <div>Course: {user.course}</div>
+                                {user.student_id && <div>ID: {user.student_id}</div>}
+                              </div>
+                            )}
+                            {user.role === 'staff' && (
+                              <div className="text-sm">
+                                <div>Category: {user.category}</div>
+                                {user.specialization && <div>Specialization: {user.specialization}</div>}
+                              </div>
+                            )}
+                          </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
                               <Button
@@ -216,6 +238,7 @@ export default function AdminUsers() {
                         <TableHead>Email</TableHead>
                         <TableHead>Phone</TableHead>
                         <TableHead>Role</TableHead>
+                        <TableHead>Additional Info</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -225,6 +248,21 @@ export default function AdminUsers() {
                           <TableCell>{user.email}</TableCell>
                           <TableCell>{user.phone_number}</TableCell>
                           <TableCell className="capitalize">{user.role}</TableCell>
+                          <TableCell>
+                            {user.role === 'student' && (
+                              <div className="text-sm">
+                                <div>Batch: {user.batch_type} - {user.batch_number}</div>
+                                <div>Course: {user.course}</div>
+                                {user.student_id && <div>ID: {user.student_id}</div>}
+                              </div>
+                            )}
+                            {user.role === 'staff' && (
+                              <div className="text-sm">
+                                <div>Category: {user.category}</div>
+                                {user.specialization && <div>Specialization: {user.specialization}</div>}
+                              </div>
+                            )}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

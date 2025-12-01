@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import StudentHome from "./pages/student/StudentHome";
@@ -35,25 +36,25 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
 
             {/* Student Routes */}
-            <Route path="/student/home" element={<StudentHome />} />
-            <Route path="/student/submit-complaint" element={<SubmitComplaint />} />
-            <Route path="/student/complaints" element={<StudentComplaints />} />
+            <Route path="/student/home" element={<ProtectedRoute allowedRoles={["student"]}><StudentHome /></ProtectedRoute>} />
+            <Route path="/student/submit-complaint" element={<ProtectedRoute allowedRoles={["student"]}><SubmitComplaint /></ProtectedRoute>} />
+            <Route path="/student/complaints" element={<ProtectedRoute allowedRoles={["student"]}><StudentComplaints /></ProtectedRoute>} />
 
             {/* Staff Routes */}
-            <Route path="/staff/home" element={<StaffHome />} />
-            <Route path="/staff/complaints" element={<StaffComplaints />} />
+            <Route path="/staff/home" element={<ProtectedRoute allowedRoles={["staff"]}><StaffHome /></ProtectedRoute>} />
+            <Route path="/staff/complaints" element={<ProtectedRoute allowedRoles={["staff"]}><StaffComplaints /></ProtectedRoute>} />
 
             {/* Admin Routes */}
-            <Route path="/admin/dashboard" element={<AdminDashboardHome />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/staff" element={<AdminStaff />} />
-            <Route path="/admin/complaints" element={<AdminComplaints />} />
-            <Route path="/admin/categories" element={<AdminCategories />} />
-            <Route path="/admin/notifications" element={<AdminNotifications />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboardHome /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["admin"]}><AdminUsers /></ProtectedRoute>} />
+            <Route path="/admin/staff" element={<ProtectedRoute allowedRoles={["admin"]}><AdminStaff /></ProtectedRoute>} />
+            <Route path="/admin/complaints" element={<ProtectedRoute allowedRoles={["admin"]}><AdminComplaints /></ProtectedRoute>} />
+            <Route path="/admin/categories" element={<ProtectedRoute allowedRoles={["admin"]}><AdminCategories /></ProtectedRoute>} />
+            <Route path="/admin/notifications" element={<ProtectedRoute allowedRoles={["admin"]}><AdminNotifications /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={["admin"]}><AdminSettings /></ProtectedRoute>} />
 
             {/* Shared Routes */}
-            <Route path="/complaint/:id" element={<ComplaintDetail />} />
+            <Route path="/complaint/:id" element={<ProtectedRoute><ComplaintDetail /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

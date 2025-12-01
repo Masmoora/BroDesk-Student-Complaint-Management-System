@@ -15,6 +15,8 @@ interface StaffMember {
   phone_number: string | null;
   approval_status: string | null;
   assigned_complaints?: number;
+  category?: string;
+  specialization?: string;
 }
 
 export default function AdminStaff() {
@@ -167,6 +169,7 @@ export default function AdminStaff() {
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
+                    <TableHead>Category</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Assigned Complaints</TableHead>
                     <TableHead>Actions</TableHead>
@@ -178,6 +181,14 @@ export default function AdminStaff() {
                       <TableCell>{member.full_name}</TableCell>
                       <TableCell>{member.email}</TableCell>
                       <TableCell>{member.phone_number}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{member.category || "N/A"}</div>
+                          {member.specialization && (
+                            <div className="text-muted-foreground text-xs">{member.specialization}</div>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant={
