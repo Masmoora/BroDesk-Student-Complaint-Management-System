@@ -29,7 +29,7 @@ export default function AdminDashboardHome() {
 
   const fetchStats = async () => {
     const [usersResult, complaintsResult] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("approval_status", "approved"),
       supabase.from("complaints").select("status"),
     ]);
 
