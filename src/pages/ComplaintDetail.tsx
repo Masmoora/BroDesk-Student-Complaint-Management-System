@@ -126,6 +126,28 @@ export default function ComplaintDetail() {
 
       if (error) throw error;
 
+      // Create notification for the student
+      if (complaint?.student_id) {
+        let notificationMessage = '';
+        let notificationType: 'complaint_updated' | 'complaint_resolved' = 'complaint_updated';
+        
+        if (newStatus === 'resolved') {
+          notificationMessage = `Your complaint "${complaint.title}" has been resolved.`;
+          notificationType = 'complaint_resolved';
+        } else if (newStatus === 'in_progress') {
+          notificationMessage = `Your complaint "${complaint.title}" is now being processed.`;
+        } else {
+          notificationMessage = `Your complaint "${complaint.title}" status has been updated to ${newStatus}.`;
+        }
+
+        await supabase.from("notifications").insert({
+          user_id: complaint.student_id,
+          title: "Complaint Status Updated",
+          message: notificationMessage,
+          type: notificationType,
+        });
+      }
+
       toast({
         title: "Success",
         description: "Status updated successfully",
