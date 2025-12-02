@@ -33,19 +33,40 @@ export default function StaffComplaints() {
   }, [user]);
 
   const fetchComplaints = async () => {
-    const { data, error } = await supabase
-      .from("complaints")
-      .select(`
-        *,
-        student_profile:profiles!complaints_student_id_fkey(full_name)
-      `)
-      .eq("assigned_to", user?.id)
-      .order("created_at", { ascending: false });
+    try {
+      const { data: complaintsData, error } = await supabase
+        .from("complaints")
+        .select("*")
+        .eq("assigned_to", user?.id)
+        .order("created_at", { ascending: false });
 
-    if (!error && data) {
-      setComplaints(data as any);
+      if (error) {
+        console.error("Error fetching complaints:", error);
+        setLoading(false);
+        return;
+      }
+
+      if (complaintsData && complaintsData.length > 0) {
+        const studentIds = [...new Set(complaintsData.map(c => c.student_id))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", studentIds);
+
+        const complaintsWithProfiles = complaintsData.map(complaint => ({
+          ...complaint,
+          student_profile: profilesData?.find(p => p.id === complaint.student_id),
+        }));
+
+        setComplaints(complaintsWithProfiles as any);
+      } else {
+        setComplaints([]);
+      }
+    } catch (error) {
+      console.error("Error in fetchComplaints:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
