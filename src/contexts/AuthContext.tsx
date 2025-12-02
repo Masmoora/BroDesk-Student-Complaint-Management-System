@@ -189,13 +189,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return { error: roleError };
         }
 
-        // Create notification for admin about new signup
-        await supabase.from("notifications").insert({
-          user_id: user.id,
-          title: "New User Registration",
-          message: `New ${role} registration: ${fullName} (${email})`,
-          type: "signup",
-        });
+        // Create notifications for all admins about new signup
+        const { data: adminRoles } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "admin");
+
+        if (adminRoles && adminRoles.length > 0) {
+          const adminNotifications = adminRoles.map(admin => ({
+            user_id: admin.user_id,
+            title: "New User Registration",
+            message: `New ${role} registration: ${fullName} (${email}) - Pending approval`,
+            type: "signup",
+          }));
+
+          await supabase.from("notifications").insert(adminNotifications);
+        }
 
         // Sign out immediately after signup to prevent auto-login
         await supabase.auth.signOut();

@@ -40,32 +40,61 @@ export default function AdminComplaints() {
   }, []);
 
   const fetchData = async () => {
-    const [complaintsResult, staffResult] = await Promise.all([
-      supabase
+    try {
+      // Fetch complaints with student profile data
+      const { data: complaintsData, error: complaintsError } = await supabase
         .from("complaints")
-        .select(`
-          *,
-          student_profile:profiles!complaints_student_id_fkey(full_name)
-        `)
-        .order("created_at", { ascending: false }),
-      supabase
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (complaintsError) {
+        console.error("Error fetching complaints:", complaintsError);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch student profiles for the complaints
+      if (complaintsData && complaintsData.length > 0) {
+        const studentIds = [...new Set(complaintsData.map(c => c.student_id))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", studentIds);
+
+        // Merge profile data with complaints
+        const complaintsWithProfiles = complaintsData.map(complaint => ({
+          ...complaint,
+          student_profile: profilesData?.find(p => p.id === complaint.student_id),
+        }));
+
+        setComplaints(complaintsWithProfiles as any);
+      }
+
+      // Fetch staff members
+      const { data: staffRoles } = await supabase
         .from("user_roles")
-        .select(`
-          user_id,
-          profile:profiles!user_roles_user_id_fkey(full_name)
-        `)
-        .eq("role", "staff"),
-    ]);
+        .select("user_id")
+        .eq("role", "staff");
 
-    if (!complaintsResult.error && complaintsResult.data) {
-      setComplaints(complaintsResult.data as any);
+      if (staffRoles && staffRoles.length > 0) {
+        const staffIds = staffRoles.map(s => s.user_id);
+        const { data: staffProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", staffIds);
+
+        const staffWithProfiles = staffRoles.map(role => ({
+          user_id: role.user_id,
+          profile: staffProfiles?.find(p => p.id === role.user_id),
+        }));
+
+        setStaff(staffWithProfiles as any);
+      }
+    } catch (error) {
+      console.error("Error in fetchData:", error);
+    } finally {
+      setLoading(false);
     }
-
-    if (!staffResult.error && staffResult.data) {
-      setStaff(staffResult.data as any);
-    }
-
-    setLoading(false);
   };
 
   const handleAssignStaff = async (complaintId: string, staffId: string) => {
