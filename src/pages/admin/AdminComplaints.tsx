@@ -70,7 +70,7 @@ export default function AdminComplaints() {
         setComplaints(complaintsWithProfiles as any);
       }
 
-      // Fetch staff members
+      // Fetch staff members (only approved staff)
       const { data: staffRoles } = await supabase
         .from("user_roles")
         .select("user_id")
@@ -81,12 +81,15 @@ export default function AdminComplaints() {
         const { data: staffProfiles } = await supabase
           .from("profiles")
           .select("id, full_name")
-          .in("id", staffIds);
+          .in("id", staffIds)
+          .eq("approval_status", "approved");
 
-        const staffWithProfiles = staffRoles.map(role => ({
-          user_id: role.user_id,
-          profile: staffProfiles?.find(p => p.id === role.user_id),
-        }));
+        const staffWithProfiles = staffRoles
+          .map(role => ({
+            user_id: role.user_id,
+            profile: staffProfiles?.find(p => p.id === role.user_id),
+          }))
+          .filter(staff => staff.profile !== undefined);
 
         setStaff(staffWithProfiles as any);
       }

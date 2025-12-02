@@ -148,6 +148,23 @@ export default function ComplaintDetail() {
         });
       }
 
+      // Create notification for all admins
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+
+      if (adminRoles && adminRoles.length > 0) {
+        const adminNotifications = adminRoles.map(admin => ({
+          user_id: admin.user_id,
+          title: "Complaint Status Updated",
+          message: `Complaint "${complaint?.title}" status changed to ${newStatus}.`,
+          type: "complaint_updated",
+        }));
+
+        await supabase.from("notifications").insert(adminNotifications);
+      }
+
       toast({
         title: "Success",
         description: "Status updated successfully",
