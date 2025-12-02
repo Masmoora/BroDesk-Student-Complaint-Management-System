@@ -175,7 +175,7 @@ export default function SubmitComplaint() {
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="" disabled>No categories available</SelectItem>
+                      <SelectItem value="none" disabled>No categories available</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
