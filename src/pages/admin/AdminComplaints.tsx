@@ -103,6 +103,7 @@ export default function AdminComplaints() {
   const handleAssignStaff = async (complaintId: string, staffId: string) => {
     // Get complaint details for notification
     const complaint = complaints.find(c => c.id === complaintId);
+    const staffMember = staff.find(s => s.user_id === staffId);
     
     const { error } = await supabase
       .from("complaints")
@@ -116,14 +117,31 @@ export default function AdminComplaints() {
         variant: "destructive",
       });
     } else {
-      // Create notification for the assigned staff member
-      if (complaint) {
+      if (complaint && staffMember) {
+        // Create notification for the assigned staff member
         await supabase.from("notifications").insert({
           user_id: staffId,
           title: "New Complaint Assigned",
           message: `You have been assigned to complaint: "${complaint.title}"`,
           type: "complaint_assigned",
         });
+
+        // Create notification for all admins about the assignment
+        const { data: adminRoles } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "admin");
+
+        if (adminRoles && adminRoles.length > 0) {
+          const adminNotifications = adminRoles.map(admin => ({
+            user_id: admin.user_id,
+            title: "Complaint Assigned",
+            message: `Complaint "${complaint.title}" has been assigned to ${staffMember.profile?.full_name || "staff member"}.`,
+            type: "complaint_assigned",
+          }));
+
+          await supabase.from("notifications").insert(adminNotifications);
+        }
       }
 
       toast({
